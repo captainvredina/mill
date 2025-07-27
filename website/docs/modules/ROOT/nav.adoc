@@ -1,4 +1,5 @@
 // This section of the docs is very much "by example": how to do this, do that,
+
 // do this other thing, etc. We touch on a lot of topics about how Mill works,
 // but we intentionally skim over them and do not go into depth: the focus is
 // on end user goals and how to achieve them.
@@ -34,7 +35,8 @@
 ** Building Android Apps
 *** xref:android/android-initial-setup.adoc[]
 *** xref:android/java.adoc[]
-*** xref:android/kotlin.adoc[]
+*
+** xref:android/kotlin.adoc[]
 *** xref:android/android-linting.adoc[]
 *** xref:android/compose-samples.adoc[]
 *** xref:android/hilt-sample.adoc[]
@@ -69,7 +71,8 @@
 // This section gives a tour of the various user-facing features of Mill:
 // library deps, out folder, queries, tasks, etc.. These are things that
 // every Mill user will likely encounter, and are touched upon in the various
-// language-specific sections, but here we go into a deeper language-agnostic
+/
+/ language-specific sections, but here we go into a deeper language-agnostic
 // discussion of what these Mill features ar and how they work
 * Mill Fundamentals
 ** xref:fundamentals/tasks.adoc[]
@@ -84,7 +87,8 @@
 // breaking out on its own
 * Extending Mill
 ** xref:extending/import-mvn-plugins.adoc[]
-** xref:extending/contrib-plugins.adoc[]
+** xref:extending/contrib-plugins
+.adoc[]
 // See also the list in Contrib_Plugins.adoc
 *** xref:contrib/artifactory.adoc[]
 *** xref:contrib/buildinfo.adoc[]
@@ -104,7 +108,9 @@
 ** xref:extending/thirdparty-plugins.adoc[]
 ** xref:extending/running-jvm-code.adoc[]
 ** xref:extending/writing-plugins.adoc[]
+
 ** xref:extending/meta-build.adoc[]
+
 ** xref:extending/example-typescript-support.adoc[]
 ** xref:extending/example-python-support.adoc[]
 * xref:large/large.adoc[]
@@ -130,3 +136,5 @@
 ** {mill-doc-url}/api/latest/mill.html[Mill API Reference]
 ** {mill-github-url}/blob/main/changelog.adoc[Changelog]
 ** xref:reference/talks-blog-posts.adoc[]]
+
+
