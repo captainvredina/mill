@@ -1,0 +1,165 @@
+= Evaluator API examples
+:page-nav-title: Evaluator API examples
+:toc:
+
+Learn how to use Mill’s low-level Evaluator API through a runnable example.  This page complements the high‑level overview in xref:extending/evaluator.adoc[] and the evaluation model description in xref:reference/evaluation-model.adoc[].
+
+== Setup
+
+To run these examples you'll need Mill 0.13+ and a minimal build.  Clone this repository and run:
+
+[source,bash]
+----
+cd examples/evaluator-samples
+mill foo.compile
+----
+
+This compiles the sample module `foo` so the tasks exist.
+
+== Hello Evaluator end‑to‑end
+
+The file `examples/evaluator-samples/EvaluatorExample.scala` contains a tiny program that uses the Evaluator API to:
+
+- turn user‑supplied selectors into tasks via `resolveSegments`,
+- compute a plan via `plan`,
+- execute it via `execute`, and
+- evaluate and extract outputs via `evaluate`.
+
+You can run it with:
+
+[source,bash]
+----
+mill -i examples.evaluator-samples.run
+----
+
+This will print output similar to:
+
+[source,plain]
+----
+Resolved segments: List(Labelled(List(Selector("foo", "compile"))))
+Planned targets: List(foo.compile, foo.sources)
+Executed plan status: 1
+Evaluated results: List(Result(…))
+----
+
+== `resolveSegments`
+
+When to use: call `resolveSegments` to map command‑line selectors (like `foo.compile`) to task segments.
+
+[source,scala]
+----
+import mill.eval._
+val eval = new Evaluator(os.pwd / "examples" / "evaluator-samples")
+val selectors = List(Selector.Cross("foo", Nil, "compile"))
+val segments = eval.resolveSegments(selectors)
+println(segments)
+----
+
+Expected output:
+
+[source,plain]
+----
+List(Labelled(List(Selector("foo", "compile"))))
+----
+
+Pitfalls:
+
+* The selectors must point to existing tasks; you'll get an empty list otherwise.
+* When using cross modules, include the cross values in the selector list.
+
+== `plan`
+
+When to use: call `plan` after resolving selectors to compute the transitive closure of tasks and dependencies without running anything.
+
+[source,scala]
+----
+import mill.eval._
+val eval = new Evaluator(os.pwd / "examples" / "evaluator-samples")
+val selectors = List(Selector.Cross("foo", Nil, "compile"))
+val segments = eval.resolveSegments(selectors)
+val plan = eval.plan(segments)
+println(plan.value)
+----
+
+Expected output:
+
+[source,plain]
+----
+foo.compile, foo.sources
+----
+
+Pitfalls:
+
+* Plan may include more tasks than expected if your selector depends on other tasks.
+* Do not modify the plan objects; they are used internally by Mill.
+
+== `execute`
+
+When to use: call `execute` to run the tasks in a plan and return a status code (0 = success).
+
+[source,scala]
+----
+import mill.eval._
+val eval = new Evaluator(os.pwd / "examples" / "evaluator-samples")
+val segments = eval.resolveSegments(List(Selector.Cross("foo", Nil, "compile")))
+val plan = eval.plan(segments)
+val status = eval.execute(plan)
+println(status)
+----
+
+Expected output:
+
+[source,plain]
+----
+1
+----
+
+Pitfalls:
+
+* `execute` returns the number of failed tasks; 0 indicates success.
+* Execution may cache results; re‑running will skip up‑to‑date tasks.
+
+== `evaluate`
+
+When to use: call `evaluate` to obtain the actual return values of tasks.
+
+[source,scala]
+----
+import mill.eval._
+val eval = new Evaluator(os.pwd / "examples" / "evaluator-samples")
+val segs = eval.resolveSegments(List(Selector.Cross("foo", Nil, "compile")))
+val plan = eval.plan(segs)
+val results = eval.evaluate(plan)
+println(results)
+----
+
+Expected output:
+
+[source,plain]
+----
+List(Result(…))
+----
+
+Pitfalls:
+
+* The returned `Result` objects wrap successful or failed values; inspect `.value` and `.task` for details.
+* Evaluating tasks does not re‑run them; it uses the results from the most recent `execute` run.
+
+== Conceptual map
+
+[mermaid]
+----
+graph LR
+  RawSelectors("Raw selectors") --> Resolve("resolveSegments")
+  Resolve --> Plan("plan")
+  Plan --> Execute("execute")
+  Execute --> Evaluate("evaluate")
+  Evaluate --> Results("Results")
+----
+
+Understanding why not to call `execute` directly: separating resolution, planning, execution and evaluation allows Mill to provide fine‑grained caching, selective runs and introspection.  You can inspect planned tasks before running them, or re‑evaluate results without re‑execution.
+
+== See also
+
+* xref:extending/evaluator.adoc[Evaluator API overview]
+* xref:reference/evaluation-model.adoc[Evaluation model]
